@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+	<style>
+		* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font-family: Arial, sans-serif;
+}
+
+header {
+	background-color: #1DB954;
+	color: #fff;
+	padding: 20px;
+}
+
+nav {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+nav ul {
+	list-style: none;
+	display: flex;
+}
+
+nav li {
+	margin-right: 20px;
+}
+
+nav a {
+	color: #fff;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+nav form {
+	display: flex;
+}
+
+nav input[type="text"] {
+	padding: 10px;
+	border: none;
+	border-radius: 5px 0 0 5px;
+}
+
+nav button[type="submit"] {
+	background-color: #191414;
+	color: #fff;
+	padding: 10px 20px;
+	border: none;
+	border-radius: 0 5px 5px 0;
+	cursor: pointer;
+}
+
+main {
+	padding: 20px;
+}
+
+h1 {
+	font-size: 28px;
+	margin-bottom: 20px;
+}
+
+.album-list {
+	list-style: none;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	grid-gap: 20px;
+}
+
+.album-list li {
+	border: 1px solid #ddd;
+	border-radius: 5px;
+	overflow: hidden;
+}
+
+.album-list img {
+	width: 100%;
+	height: 200px;
+	object-fit: cover;
+}
+
+.album-list span {
+	display: block;
+	padding: 10px;
+	text-align: center;
+	}
+
+<!--	ls-->
+
+.song-list {
+	border: 1px solid #ddd;
+	border-radius: 5px;
+	padding: 20px;
+	margin-top: 20px;
+}
+
+.song-list:hover .song-item {
+	background-color: #f5f5f5;
+}
+
+.song-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.song-item:hover {
+    background-color: #eee;
+}
+
+.song-title {
+    display: block;
+    background-color: #fff;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.song-title a {
+	color: black;
+	text-decoration: none;
+}
+
+.song-title:hover {
+    background-color: #ddd;
+}
+
+.song-duration {
+    margin-left: 10px;
+}
+
+li:first-child {
+  list-style: none;
+}
+<!--	 ss -->
+
+.albums {
+    margin-bottom: 20px;
+}
+
+.albums h3 {
+    margin-top: 0;
+}
+
+.albums ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.albums li {
+    margin-bottom: 10px;
+}
+
+.wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  box-shadow: 0px -1px 5px rgba(0, 0, 0, 0.25);
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+}
+
+.audio {
+  display: none;
+}
+
+.song {
+  font-size: 16px;
+  font-weight: 700;
+  margin-right: 16px;
+}
+
+.progress__container {
+  background: #E4E9ED;
+  border-radius: 5px;
+  width: 100%;
+  height: 10px;
+  margin-top: 63px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  .progress{
+    background: #2B3C5B;
+    border-radius: 5px;
+    height: 6px;
+  }
+}
+
+.buttons {
+  display: flex;
+}
+
+.btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+}
+
+.btn img {
+  width: 24px;
+  height: 24px;
+}
+
+.btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.bookmark {
+  position: fixed;
+  top: 0;
+  right: 0;
+  margin-top: 100px;
+  margin-right: 50px;
+}
+
+.bookmark-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.frame {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.avatar {
+  border-radius: 50%;
+  border: 2px solid #000;
+}
+
+.frame .avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 2px solid #000;
+}
+
+.bio-container {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.text-bio {
+  text-align: center;
+}
+
+.profile-update  {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.profile-update  label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.profile-update  input[type="text"], form textarea {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-bottom: 20px;
+}
+
+.profile-update  input[type="file"] {
+  display: block;
+  margin-bottom: 20px;
+}
+
+.profile-update  button[type="submit"] {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: none;
+  background-color: #4CAF50;
+  color: white;
+  cursor: pointer;
+}
+
+.profile-update  button[type="submit"]:hover {
+  background-color: #3e8e41;
+}
+
+.btn-update {
+  text-align: center;
+}
+
+.btn-update a {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.btn-singer {
+  text-decoration: none;
+  color: black;
+}
+
+.btn-follow {
+  text-align: center;
+}
+
+.btn-follow a {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.subscribers-list {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+}
+
+
+.subscribers-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.subscribers-list li {
+  margin: 5px 0;
+  padding: 5px;
+  background-color: #f1f1f1;
+  border-radius: 5px;
+}
+
+.subscribers-list a {
+  text-decoration: none;
+  color: black;
+}
+
+.singer-name {
+  text-align: center;
+}
+
+.pricing-table {
+  display: flex;
+  justify-content: space-around;
+  text-align: center; /* Додали цей рядок */
+}
+
+.plan {
+  width: 300px;
+  background-color: #f5f5f5;
+  text-align: center;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.plan h2 {
+  font-size: 24px;
+  font-weight: 500;
+  margin-top: 0px;
+}
+
+.plan p.price {
+  font-size: 36px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.plan ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.plan li {
+  padding: 10px;
+}
+
+.plan a.button {
+  display: block;
+  background-color: #1db954;
+  color: #fff;
+  text-decoration: none;
+  padding: 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.plan a.button:hover {
+  background-color: #0f8043;
+}
+
+
+	</style>
+</head>
+<body>
+    <header>
+		<nav>
+			<ul>
+				<li><a href="/">Home</a></li>
+				<li><a href="#">Genres</a></li>
+				{% if user.is_authenticated %}
+				<li><a href="{% url 'add_song' %}">Add Song</a></li>
+				<li><a href="{% url 'profile' %}">Profile</a></li>
+				<li><a href="{% url 'logout' %}">Logout</a></li>
+				{% else %}
+				<li><a href="{% url 'login' %}">Login</a>|<a href="{% url 'register' %}">Register</a></li>
+				{% endif %}
+			</ul>
+			<form action="{% url 'search' %}" method="get">
+				<input name="search" type="text" placeholder="Search">
+				<button type="submit">Search</button>
+			</form>
+		</nav>
+	</header>
+	{% block content %}
+    {% endblock %}
+<!--<script src="{% static 'js/script.js' %}"></script>-->
+</body>
+</html>

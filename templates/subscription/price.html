@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="pricing-table">
+  {% for price in prices %}
+  <div class="plan">
+    <h2>{{ price.name }}y</h2>
+    <p class="price">${{ price.price }}</p>
+    <ul>
+      <li>{{ price.description }}</li>
+    </ul>
+    <a href="#" class="button">Buy</a>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

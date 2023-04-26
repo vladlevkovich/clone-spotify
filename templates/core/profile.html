@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<main>
+<div>
+  <div class="frame">
+    {% if profile.avatar %}
+    <img class="avatar" src="{{ profile.avatar.url }}" alt="avatar">
+    {% else %}
+    <img class="avatar" src="{% static 'image/avatar-default.svg' %}" alt="avatar">
+    {% endif %}
+  </div>
+  <div class="singer-name">
+    <p>{{ user.first_name }}</p>
+  </div>
+  <div class="bio-container">
+    {% if not bio %}
+    <p class="text-bio">{{ profile.bio }}</p>
+    {% else %}
+    <p class="text-bio">Bio</p>
+    {% endif %}
+  </div>
+  <div class="btn-update">
+    <a href="{% url 'update_profile' %}">Update</a>
+    <a href="{% url 'prices' %}">Subscriptions</a>
+  </div>
+  {% for album in profile.albums.all %}
+  <ul class="album-list">
+    <li>
+      <a href="{% url 'album' album_slug=album.slug %}">
+        <img src="{{ album.cover.url }}" alt="{{ profile.album }}">
+        <span>{{ album.title }}</span>
+      </a>
+    </li>
+  </ul>
+  {% endfor %}
+</div>
+<div>
+  <h1>Saved</h1>
+  {% for favorite in profile.user.favorite_album.all %}
+  <ul class="my-album-list">
+    <li>
+      <a href="{% url 'album' album_slug=favorite.slug %}">
+        <img src="{{ favorite.cover.url }}" alt="{{ favorite.album }}">
+        <span>{{ favorite.title }}</span>
+      </a>
+    </li>
+  </ul>
+  <ul class="album-list">
+  {% endfor %}
+</div>
+</main>
+{% endblock %}

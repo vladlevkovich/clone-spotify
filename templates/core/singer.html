@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div>
+    <div class="frame">
+        {% if singer.avatar %}
+        <img class="avatar" src="{{ singer.avatar.url }}" alt="avatar">
+        {% else %}
+        <img avatar src="{% static 'image/avatar-default.svg' %}" alt="avatar">
+        {% endif %}
+    </div>
+    <div class="singer-name">
+      <p>{{ singer_user.first_name }}</p>
+    </div>
+    <div class="bio-container">
+        {% if not bio %}
+        <p class="text-bio">{{ singer.bio }}</p>
+        {% else %}
+        <p class="text-bio">none</p>
+        {% endif %}
+    </div>
+    <div class="btn-follow">
+      <div>
+        <form method="post">
+          {% csrf_token %}
+          {% if singer_user in current_user.followers.all %}
+          <button class="btn btn--outline-danger" name="follower" value="unfollow">Unfollow</button>
+          {% else %}
+          <button class="btn btn--outline-succes" name="follower" value="follow">Follow</button>
+          </form>
+          {% endif %}
+      </div>
+    </div>
+    <div>
+        <ul class="album-list">
+            {% for album in singer_album %}
+            <li>
+              <a href="{% url 'album' album_slug=album.slug %}">
+                <img src="{{ album.cover.url }}" alt="{{ profile.album }}">
+                <span>{{ album.title }}</span>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+    </div>
+</div>
+{% endblock %}

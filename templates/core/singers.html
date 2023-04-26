@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<div>
+    {% for singer in singers %}
+    <a class="btn-singer" href="{% url 'singer' pk=singer.pk %}">
+        <p>{{ singer.user.last_name }}</p>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

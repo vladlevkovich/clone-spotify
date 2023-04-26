@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<main>
+	<h1>Albums</h1>
+	<ul class="album-list">
+		{% for album in albums %}
+		<li>
+			<a href="{% url 'album' album_slug=album.slug %}">
+				{% if album.cover %}
+				<img src="{{ album.cover.url }}" alt="{{ album.title }}">
+				{% endif %}
+				<span>{{ album.title }}</span>
+			</a>
+		</li>
+		{% endfor %}
+	</ul>
+	<h1>Songs</h1>
+	<ul class="album-list">
+		{% for song in songs %}
+		<li>
+			<a href="#">
+				<span>{{ song.title }}</span>
+			</a>
+		</li>
+		{% endfor %}
+	</ul>
+</main>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<main>
+	<div class="bookmark">
+		{% if not is_favorite %}
+		<a href="{% url 'favorite' album_slug=album.slug %}">
+        	<img class="bookmark-icon" src="{% static 'image/favorite.svg' %}" alt="Add to bookmarks">
+		</a>
+		{% else %}
+		<a href="{% url 'favorite' album_slug=album.slug %}">
+        	<img class="bookmark-icon" src="{% static 'image/favorite-ok.svg' %}" alt="Add to bookmarks">
+		</a>
+		{% endif %}
+    </div>
+	<h1>{{ album.title }}</h1>
+	<div class="song-list">
+		<ul>
+			<li>
+				<div class="song-list">
+					<ul>
+						{% for song in album.song.all %}
+						<li class="song-item">
+							<div class="song-title">
+								<a href="#">{{ song }}</a>
+							</div>
+							<div class="song-duration">{{ album.is_public }}</div>
+						</li>
+						{% endfor %}
+					</ul>
+				</div>
+			</li>
+		</ul>
+	</div>
+	<div class="wrapper">
+		<div class="player">
+			<div class="title">Title song</div>
+			<audio class="audio" src="/media/songs/song1.mp3"></audio>
+			<div class="progress__container">
+				<div class="progress"></div>
+			</div>
+			<div class="buttons">
+				<div class="btn prev">
+					<img src="{% static 'image/prev.svg' %}">
+				</div>
+				<div class="btn play">
+					<img class="img__src" src="{% static 'image/play.svg' %}">
+				</div>
+				<div class="btn next">
+					<img src="{% static 'image/next.svg' %}">
+				</div>
+			</div>
+		</div>
+	</div>
+{{ songs | json_script:'core' }}
+<script src="{% static 'js/player.js' %}"></script>
+</main>
+{% endblock %}

@@ -222,5 +222,204 @@ li:first-child {
   background-color: rgba(0, 0, 0, 0.05);
 }
 
+.bookmark {
+  position: fixed;
+  top: 0;
+  right: 0;
+  margin-top: 100px;
+  margin-right: 50px;
+}
+
+.bookmark-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.frame {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.avatar {
+  border-radius: 50%;
+  border: 2px solid #000;
+}
+
+.frame .avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 2px solid #000;
+}
+
+.bio-container {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.text-bio {
+  text-align: center;
+}
+
+.profile-update  {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.profile-update  label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.profile-update  input[type="text"], form textarea {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-bottom: 20px;
+}
+
+.profile-update  input[type="file"] {
+  display: block;
+  margin-bottom: 20px;
+}
+
+.profile-update  button[type="submit"] {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: none;
+  background-color: #4CAF50;
+  color: white;
+  cursor: pointer;
+}
+
+.profile-update  button[type="submit"]:hover {
+  background-color: #3e8e41;
+}
+
+.btn-update {
+  text-align: center;
+}
+
+.btn-update a {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.btn-singer {
+  text-decoration: none;
+  color: black;
+}
+
+.btn-follow {
+  text-align: center;
+}
+
+.btn-follow a {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.subscribers-list {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+}
+
+
+.subscribers-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.subscribers-list li {
+  margin: 5px 0;
+  padding: 5px;
+  background-color: #f1f1f1;
+  border-radius: 5px;
+}
+
+.subscribers-list a {
+  text-decoration: none;
+  color: black;
+}
+
+.singer-name {
+  text-align: center;
+}
+
+.pricing-table {
+  display: flex;
+  justify-content: space-around;
+  text-align: center; /* Додали цей рядок */
+}
+
+.plan {
+  width: 300px;
+  background-color: #f5f5f5;
+  text-align: center;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.plan h2 {
+  font-size: 24px;
+  font-weight: 500;
+  margin-top: 0px;
+}
+
+.plan p.price {
+  font-size: 36px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.plan ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.plan li {
+  padding: 10px;
+}
+
+.plan a.button {
+  display: block;
+  background-color: #1db954;
+  color: #fff;
+  text-decoration: none;
+  padding: 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.plan a.button:hover {
+  background-color: #0f8043;
+}
 
 

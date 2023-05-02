@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
+from allauth.socialaccount.models import SocialLogin, SocialAccount
 from django.db import transaction
 from .models import *
 from ..core.models import Profile
@@ -21,6 +22,12 @@ def user_register(request):
         'form': form
     }
     return render(request, 'users/register.html', context)
+
+
+def user_register_with_google(request):
+    social_account = SocialAccount.objects.get(user=request.user, provider='google')
+    email = social_account.extra_data['email']
+    new_user = CustomUser(email=email)
 
 
 def user_login(request):

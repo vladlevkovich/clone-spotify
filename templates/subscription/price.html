@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="pricing-table">
+  {{ user.email }}
   {% for price in prices %}
   <div class="plan">
     <h2>{{ price.name }}y</h2>
@@ -8,9 +9,12 @@
     <ul>
       <li>{{ price.description }}</li>
     </ul>
-    <a href="#" class="button">Buy</a>
+    {% if user_subscription_price == price.subscription_id %}
+      <a href="{% url 'cancel' %}" class="button">Cancel</a>
+    {% else %}
+        <a href="{% url 'subscribe' sub.pk %}" class="button">Buy</a>
+    {% endif %}
   </div>
   {% endfor %}
 </div>
-
 {% endblock %}

@@ -8,4 +8,5 @@ urlpatterns = [
     path('subscribe/<int:subscribe_id>/', subscribe, name='subscribe'),
     path('success/', success, name='success'),
     path('cancel/', canceled, name='cancel'),
+    path('subscribe-update/<int:pk>/', update_subscription, name='subscribe_update'),
 ]

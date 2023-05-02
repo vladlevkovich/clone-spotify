@@ -11,13 +11,22 @@ from django.contrib.auth.decorators import login_required
 from config import settings
 from datetime import datetime, timedelta
 from .models import *
+from ..core.models import Profile
 from ..users.models import CustomUser
 
 
 def list_prices(request):
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    user_subscription = UserSubscription.objects.get(user=request.user)
+    sub = stripe.Subscription.retrieve(
+        user_subscription.sub_id
+    )
+    user_subscription_price = sub['items']['data'][0]['plan']['id']
     prices = Subscriptions.objects.all()
     context = {
-        'prices': prices
+        'prices': prices,
+        'user_subscription': user_subscription,
+        'user_subscription_price': user_subscription_price
     }
     return render(request, 'subscription/price.html', context)
 
@@ -76,16 +85,21 @@ def subscribe(request, subscribe_id):
         print('subscribe:', subscription_current_user)
         print('sub_id:', user_subscription_id)
 
-        try:
-            user_subscription = UserSubscription(user=request.user, subscription=sub, sub_id=user_subscription_id,
-                                                 end_date=datetime.now() + timedelta(days=sub.duration))
-            user_subscription.save()
-        except UserSubscription.DoesNotExist:
-            user_subscription = UserSubscription(user=request.user)
-            user_subscription.subscription = sub
-            user_subscription.end_date = datetime.now() + timedelta(days=sub.duration)
-            user_subscription.save()
-        return redirect(checkout_session.url, code=303)
+        if subscription_current_user['items']['data'][0]['plan']['active']:
+            profile = Profile.objects.get(user=request.user)
+            profile.is_subscription = True
+            profile.save()
+
+            try:
+                user_subscription = UserSubscription(user=request.user, subscription=sub, sub_id=user_subscription_id,
+                                                     end_date=datetime.now() + timedelta(days=sub.duration))
+                user_subscription.save()
+            except UserSubscription.DoesNotExist:
+                user_subscription = UserSubscription(user=request.user)
+                user_subscription.subscription = sub
+                user_subscription.end_date = datetime.now() + timedelta(days=sub.duration)
+                user_subscription.save()
+            return redirect(checkout_session.url, code=303)
     except Exception as error:
         raise error
 
@@ -97,9 +111,138 @@ def success(request):
     return redirect('profile')
 
 
+# @login_required()
+# def subscribe_update(request, pk):
+#     stripe.api_key = settings.STRIPE_SECRET_KEY
+#     profile = Profile.objects.get(user=request.user)
+#
+#     if profile.is_subscription:
+#         subscription = Subscriptions.objects.get(pk=pk)
+#         user_subscription = UserSubscription.objects.get(user=request.user)
+#         current_subscription = stripe.Subscription.retrieve(
+#             user_subscription.sub_id
+#         )
+#         new_sub = stripe.Subscription.modify(
+#             user_subscription.sub_id,
+#             cancel_at_period_end=True,
+#             proration_behavior='create_perorations',
+#             items=[
+#                 {
+#                     'id': current_subscription['items'].data[0].id,
+#                     'deleted': True
+#                 },
+#                 {
+#                     'plan': subscription.subscription_id
+#                 }
+#             ]
+#         )
+#
+#         user_subscription_id = update_subscription_user['id']  # отримуємо id нової підписки
+#
+#         try:
+#             user_subscription = UserSubscription.objects.get(user=request.user)
+#             user_subscription.subscription = new_sub
+#             user_subscription.sub_id = user_subscription_id
+#             user_subscription.end_date = datetime.now() + timedelta(days=new_sub.duration)
+#             user_subscription.save()
+#             # user_subscription = UserSubscription(user=request.user, subscription=new_sub, sub_id=user_subscription_id,
+#             #                                      end_date=datetime.now() + timedelta(days=new_sub.duration))
+#             # user_subscription.save()
+#         except UserSubscription.DoesNotExist:
+#             user_subscription = UserSubscription(user=request.user, subscription=new_sub, sub_id=user_subscription_id,
+#                                                  end_date=datetime.now() + timedelta(days=new_sub.duration))
+#             user_subscription.save()  # user_subscription = UserSubscription(user=request.user)
+#             # user_subscription.subscription = new_sub
+#             # user_subscription.end_date = datetime.now() + timedelta(days=new_sub.duration)
+#             # user_subscription.save()
+#
+#         context = {
+#             'subscription': subscription_user,
+#             'sub': new_sub
+#         }
+#
+#         return render(request, 'subscription/price.html', context)
+
+
 @login_required()
-def update_subscription(request):
-    pass
+def update_subscription(request, pk):
+    """Upgrade your subscription to another tariff plan"""
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    profile = Profile.objects.get(user=request.user)
+    # current_user_subscription = UserSubscription.objects.get(user=request.user)
+
+    if profile.is_subscription:
+        new_sub = Subscriptions.objects.get(pk=pk)
+        subscription_user = UserSubscription.objects.get(user=request.user)
+        current_user_subscription = stripe.Subscription.retrieve(
+            subscription_user.sub_id
+        )
+        # update_subscription_user = stripe.Subscription.modify(
+        #     subscription_user.sub_id,
+        #     items=[
+        #         {
+        #             'plan': new_sub.subscription_id
+        #         }
+        #     ]
+        # )
+
+        update_subscription_user = stripe.Subscription.modify(
+            subscription_user.sub_id,
+            cancel_at_period_end=True,
+            proration_behavior='create_prorations',
+            items=[
+                {
+                    'id': current_user_subscription['items'].data[0].id,
+                    'deleted': True
+                },
+                {
+                    'plan': new_sub.subscription_id
+                }
+            ]
+        )
+
+        user_subscription_id = update_subscription_user['id']  # отримуємо id нової підписки
+
+        print('new_sub_id:', user_subscription_id)
+        print(update_subscription_user)
+
+        try:
+            user_subscription = UserSubscription.objects.get(user=request.user)
+            user_subscription.subscription = new_sub
+            user_subscription.sub_id = user_subscription_id
+            user_subscription.end_date = datetime.now() + timedelta(days=new_sub.duration)
+            user_subscription.save()
+            # user_subscription = UserSubscription(user=request.user, subscription=new_sub, sub_id=user_subscription_id,
+            #                                      end_date=datetime.now() + timedelta(days=new_sub.duration))
+            # user_subscription.save()
+        except UserSubscription.DoesNotExist:
+            user_subscription = UserSubscription(user=request.user, subscription=new_sub, sub_id=user_subscription_id,
+                                                 end_date=datetime.now() + timedelta(days=new_sub.duration))
+            user_subscription.save()            # user_subscription = UserSubscription(user=request.user)
+            # user_subscription.subscription = new_sub
+            # user_subscription.end_date = datetime.now() + timedelta(days=new_sub.duration)
+            # user_subscription.save()
+
+        return redirect('profile')
+
+        # context = {
+        #     'subscription': subscription_user,
+        #     'sub': new_sub
+        # }
+        #
+        # return render(request, 'subscription/price.html', context)
+
+    # subscription_user = UserSubscription.objects.get(user=request.user)
+    # sub = Subscriptions.objects.get(pk=pk)
+    # user_subscription = UserSubscription.objects.get(user=request.user)
+    # stripe.Subscription.modify(
+    #     user_subscription.sub_id,
+    #     items=[
+    #         {
+    #             'plan': sub.subscription_id
+    #         }
+    #     ]
+    # )
 
 
 @login_required()
@@ -107,11 +250,14 @@ def canceled(request):
     """Canceled subscribe"""
     stripe.api_key = settings.STRIPE_SECRET_KEY
     user_subscription = UserSubscription.objects.get(user=request.user)
+    user_profile = Profile.objects.get(user=request.user)
     # user_subscription = UserSubscription.objects.get(user=request.user).sub_id
     stripe.Subscription.delete(
         user_subscription.sub_id
     )
     # user_subscription = UserSubscription.objects.get(user=request.user)
+    user_profile.is_subscription = False
+    user_profile.save()
     user_subscription.delete()
     return redirect('profile')
     # return render(request, 'subscription/cancel.html')
@@ -183,5 +329,3 @@ def webhook(request):
         payment_intent = data
 
     return JsonResponse(success=True, safe=False)
-
-

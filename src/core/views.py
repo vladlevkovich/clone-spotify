@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -20,13 +21,17 @@ def index(request):
 
 def get_album(request, album_slug):
     """Album page"""
+    user_profile = Profile.objects.get(user=request.user)
     album = get_object_or_404(Album, slug=album_slug)
     songs = list(album.song.all().values())
     is_favorite = False
     print('songs:', songs)
 
-    if album.favorite.filter(id=request.user.id).exists():
-        is_favorite = True
+    if user_profile.is_subscription:
+        if album.favorite.filter(id=request.user.id).exists():
+            is_favorite = True
+    else:
+        return
     data = {
         'album': album,
         'songs': songs,
@@ -47,100 +52,123 @@ def list_genres(request):
 @login_required()
 def favorite_album(request, album_slug):
     """Favorite album"""
-    album = get_object_or_404(Album, slug=album_slug)
-    if album.favorite.filter(id=request.user.id).exists():
-        album.favorite.remove(request.user)
-    else:
-        album.favorite.add(request.user)
+    user_profile = Profile.objects.get(user=request.user)
+    if user_profile.is_subscription:
+        album = get_object_or_404(Album, slug=album_slug)
+        if album.favorite.filter(id=request.user.id).exists():
+            album.favorite.remove(request.user)
+        else:
+            album.favorite.add(request.user)
 
-    return redirect(album.get_absolute_url())
+        return redirect(album.get_absolute_url())
+    else:
+        return
 
 
 @login_required()
 def create_album(request):
     """Create a new album"""
-    if request.method == 'POST':
-        form = CreateAlbumForm(request.POST, request.FILES)
-        if form.is_valid():
-            album = form.save(commit=False)
-            album.user = request.user
-            # album.cover = request.FILES.get('cover')
-            # print('cover:', album.cover)
-            album.save()
-            form.save_m2m()
-            return redirect('/')
-    else:
-        form = CreateAlbumForm()
+    user_profile = Profile.objects.get(user=request.user)
 
-    data = {
-        'form': form
-    }
-    return render(request, 'core/create_album.html', data)
+    if user_profile.is_subscription:
+        if request.method == 'POST':
+            form = CreateAlbumForm(request.POST, request.FILES)
+            if form.is_valid():
+                album = form.save(commit=False)
+                album.user = request.user
+                # album.cover = request.FILES.get('cover')
+                # print('cover:', album.cover)
+                album.save()
+                form.save_m2m()
+                return redirect('/')
+        else:
+            form = CreateAlbumForm()
+
+        data = {
+            'form': form
+        }
+        return render(request, 'core/create_album.html', data)
+    else:
+        return render(request, 'core/error.html')
 
 
 @login_required()
 def album_update(request, album_slug):
     user = request.user
     album = Album.objects.get(slug=album_slug)
+    user_profile = Profile.objects.get(user=user)
 
-    if album.user == user:
-        if request.method == 'POST':
-            form = CreateAlbumForm(request.POST, request.FILES, instance=album)
-            if form.is_valid():
-                form.save()
-                return redirect('album', album_slug=album.slug)
+    if user_profile.is_subscription:
+        if album.user == user:
+            if request.method == 'POST':
+                form = CreateAlbumForm(request.POST, request.FILES, instance=album)
+                if form.is_valid():
+                    form.save()
+                    return redirect('album', album_slug=album.slug)
+            else:
+                form = CreateAlbumForm(instance=album)
+
+            context = {
+                'form': form
+            }
+            return render(request, 'core/update_album.html', context)
         else:
-            form = CreateAlbumForm(instance=album)
-
-        context = {
-            'form': form
-        }
-        return render(request, 'core/update_album.html', context)
+            messages.success(request, 'You cannot edit this composition')
+            return redirect('profile')
     else:
-        messages.success(request, 'You cannot edit this composition')
-        return redirect('profile')
+        return
 
 
 @login_required()
 def add_song(request):
     """Add song"""
-    if request.method == 'POST':
-        form = AddSongForm(request.POST, request.FILES)
-        if form.is_valid():
-            song = form.save(commit=False)
-            song.user = request.user
-            song.save()
-            form.save_m2m()
-            return redirect('profile')
-    else:
-        form = AddSongForm()
+    user_profile = Profile.objects.get(user=request.user)
 
-    data = {
-        'form': form
-    }
-    return render(request, 'core/add_song.html', data)
+    if user_profile.is_subscription:
+        if request.method == 'POST':
+            form = AddSongForm(request.POST, request.FILES)
+            if form.is_valid():
+                song = form.save(commit=False)
+                song.user = request.user
+                song.save()
+                form.save_m2m()
+                return redirect('profile')
+        else:
+            form = AddSongForm()
+
+        data = {
+            'form': form
+        }
+        return render(request, 'core/add_song.html', data)
+    else:
+        return HttpResponse("You must have an active subscription to add a song.")
 
 
 @login_required()
 def song_update(request, pk):
     user = request.user
     song = Songs.objects.get(pk=pk)
-    if song.user == user:
-        if request.method == 'POST':
-            form = AddSongForm(request.POST, request.FILES, instance=song)
-            if form.is_valid():
-                form.save()
-                return redirect('profile')
-        else:
-            form = AddSongForm(instance=song)
+    user_profile = Profile.objects.get(user=user)
 
-        context = {
-            'form': form
-        }
-        return render(request, 'core/update_song.html', context)
+    if user_profile.is_subscription:
+        if song.user == user:
+            if request.method == 'POST':
+                form = AddSongForm(request.POST, request.FILES, instance=song)
+                if form.is_valid():
+                    form.save()
+                    return redirect('profile')
+            else:
+                form = AddSongForm(instance=song)
+
+            context = {
+                'form': form
+            }
+            return render(request, 'core/update_song.html', context)
+        else:
+            messages.success(request, 'You cannot edit this composition')
+            return redirect('profile')
     else:
-        messages.success(request, 'You cannot edit this composition')
-        return redirect('profile')
+        return
 
 
 @login_required()

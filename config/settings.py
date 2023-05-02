@@ -170,6 +170,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 STRIPE_PUBLIC_KEY = '#'
 STRIPE_SECRET_KEY = '#'
 
+
 STRIPE_ENDPOINT_SECRET = '#'
 
 #   Google Auth

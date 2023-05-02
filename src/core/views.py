@@ -1,3 +1,4 @@
+import stripe
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -10,6 +11,22 @@ from ..subscriptions.models import *
 
 def index(request):
     """Home page"""
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    if request.user.is_authenticated:
+        try:
+            user_subscription = UserSubscription.objects.get(user=request.user)
+            current_user_subscription = stripe.Subscription.retrieve(
+                user_subscription.sub_id
+            )
+
+            if current_user_subscription['items']['data'][0]['plan']['active']:
+                user_profile = Profile.objects.get(user=request.user)
+                user_profile.is_subscription = True
+        except UserSubscription.DoesNotExist:
+            pass
+    else:
+        pass
     albums = Album.objects.filter(is_public=True)
     songs = Songs.objects.all()
     data = {
@@ -30,8 +47,6 @@ def get_album(request, album_slug):
     if user_profile.is_subscription:
         if album.favorite.filter(id=request.user.id).exists():
             is_favorite = True
-    else:
-        return
     data = {
         'album': album,
         'songs': songs,
